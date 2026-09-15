@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Daybook</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Daybook" />
+<meta name="theme-color" content="#1e3d30" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #efece0;
+    --bg-alt: #e7e3d3;
+    --surface: #faf8ef;
+    --surface-raised: #ffffff;
+    --pine: #1e3d30;
+    --pine-strong: #14281f;
+    --pine-soft: #dde6da;
+    --pine-soft-2: #cddccc;
+    --coral: #de6141;
+    --coral-strong: #c14e30;
+    --coral-soft: #f7ded3;
+    --gold: #c68a34;
+    --ink: #262a21;
+    --muted: #6f7566;
+    --faint: #9a9c8c;
+    --line: #dbd7c5;
+    --line-strong: #c9c4ac;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 9px;
+    --font-display: "Fraunces", Georgia, "Iowan Old Style", serif;
+    --font-sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ -webkit-text-size-adjust: 100%; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    padding: 0 16px;
+    padding-block: 20px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,h2,h3{ text-wrap: balance; margin: 0; }
+  button{ font-family: inherit; }
+  ::selection{ background: var(--coral-soft); }
+
+  .wrap{
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  /* ---------- Header ---------- */
+  .header{
+    padding: 22px 22px 20px;
+    background: var(--pine);
+    border-radius: var(--radius-lg);
+    color: #f4f1e4;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before{
+    content: "";
+    position: absolute;
+    right: -60px;
+    top: -70px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(222,97,65,0.35), rgba(222,97,65,0) 70%);
+  }
+  .header-top{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    position: relative;
+  }
+  .greeting{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(26px, 6vw, 32px);
+    line-height: 1.15;
+    margin: 0 0 4px;
+    color: #fbf9ee;
+  }
+  .date-line{
+    font-size: 14px;
+    color: #cfd9cd;
+    letter-spacing: .01em;
+  }
+  .streak-pill{
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(244,241,228,0.12);
+    border: 1px solid rgba(244,241,228,0.22);
+    padding: 7px 12px 7px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #f9e3d8;
+    white-space: nowrap;
+  }
+  .streak-pill svg{ width: 15px; height: 15px; flex-shrink:0; }
+  .streak-pill .n{ font-variant-numeric: tabular-nums; color: #fbf9ee; }
+  .streak-sub{
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: #b9c4b6;
+    position: relative;
+  }
+
+  /* ---------- Section shell ---------- */
+  .section{
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .section-head{
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .section-title{
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 20px;
+    color: var(--pine-strong);
+  }
+  .section-title .accent{ color: var(--coral-strong); }
+  .icon-btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    color: var(--muted);
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .icon-btn:hover{ background: var(--surface-raised); border-color: var(--pine-soft-2); color: var(--pine-strong); }
+  .icon-btn svg{ width: 14px; height: 14px; }
+
+  /* ---------- Viewing-date banner ---------- */
+  .viewing-banner{
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--coral-soft);
+    border: 1px solid #edc0ab;
+    color: var(--coral-strong);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .viewing-banner.show{ display: flex; }
+  .viewing-banner button{
+    background: var(--coral-strong);
+    color: #fbf3ee;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ---------- Checklist ---------- */
+  .checklist{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .habit-row{
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 13px 15px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s ease, border-color .15s ease, transform .08s ease;
+  }
+  .habit-row:active{ transform: scale(0.99); }
+  .habit-row.done{
+    background: var(--pine-soft);
+    border-color: var(--pine-soft-2);
+  }
+  .habit-row .icon-wrap{
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 11px;
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--pine);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .habit-row.done .icon-wrap{
+    background: var(--pine);
+    border-color: var(--pine);
+    color: #f2efe2;
+  }
+  .habit-row .icon-wrap svg{ width: 19px; height: 19px; }
+  .habit-row .label{
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .habit-row.done .label{ color: var(--pine-strong); }
+  .habit-row .check{
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line-strong);
+    background: var(--surface-raised);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .habit-row.done .check{
+    background: var(--coral);
+    border-color: var(--coral);
+    color: #fff6f1;
+  }
+  .habit-row .check svg{ width: 13px; height: 13px; }
+  .habit-row.removable .label{ opacity: .55; }
+
+  .day-progress{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--muted);
+    padding: 2px 2px 0;
+  }
+  .day-progress .bar{
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .day-progress .bar > span{
+    display: block;
+    height: 100%;
+    background: var(--coral);
+    border-radius: 999px;
+    transition: width .25s ease;
+  }
+  .day-progress .pct{ font-weight: 700; color: var(--pine-strong); font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
+
+  /* ---------- Manage panel ---------- */
+  .manage-panel{
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 16px;
+  }
+  .manage-panel.show{ display: flex; }
+  .manage-panel h4{
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: .02em;
+    color: var(--muted);
+  }
+  .manage-list{ display: flex; flex-direction: column; gap: 6px; }
+  .manage-item{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .manage-item .icon-wrap{
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--pine-soft); color: var(--pine);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .manage-item .icon-wrap svg{ width: 15px; height: 15px; }
+  .manage-item span{ flex: 1; font-size: 13.5px; font-weight: 600; }
+  .manage-item .remove{
+    border: none; background: transparent; color: var(--coral-strong);
+    font-size: 12px; font-weight: 700; cursor: pointer; padding: 4px 8px;
+  }
+  .manage-add{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .manage-add input[type=text]{
+    flex: 1;
+    min-width: 140px;
+  }
+  select, input[type=text], input[type=number]{
+    font-family: inherit;
+    font-size: 14px;
+    padding: 9px 11px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
+  }
+  select:focus, input:focus, textarea:focus{
+    outline: 2px solid var(--pine-soft-2);
+    outline-offset: 1px;
+    border-color: var(--pine);
+  }
+  .manage-add select{ width: 96px; flex-shrink: 0; }
+  .btn-solid{
+    background: var(--pine);
+    color: #f4f1e4;
+    border: none;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .btn-solid:hover{ background: var(--pine-strong); }
+
+  /* ---------- Calendar ---------- */
+  .cal-card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 18px 16px 20px;
+  }
+  .cal-nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .cal-nav .month-label{
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--pine-strong);
+  }
+  .cal-nav-btns{ display: flex; gap: 6px; }
+  .nav-btn{
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    background: var(--surface-raised);
+    color: var(--pine-strong);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .nav-btn:hover{ background: var(--pine-soft); }
+  .nav-btn svg{ width: 14px; height: 14px; }
+  .cal-grid{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+  }
+  .cal-dow{
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .03em;
+    color: var(--faint);
+    padding-bottom: 4px;
+  }
+  .cal-day{
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    background: var(--bg-alt);
+    color: var(--faint);
+    border: 1px solid transparent;
+    cursor: default;
+  }
+  .cal-day.in-month.has-data{ cursor: pointer; }
+  .cal-day.in-month.has-data:hover{ border-color: var(--ink); }
+  .cal-day.empty{ background: transparent; }
+  .cal-day.today{ box-shadow: inset 0 0 0 2px var(--pine); }
+  .cal-day.selected{ box-shadow: inset 0 0 0 2px var(--coral-strong); }
+  .cal-day.future{ opacity: .55; }
+  .legend{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .legend-bar{
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #de6141, #c68a34, #1e3d30);
+  }
+
+  /* ---------- Goals ---------- */
+  .goals-grid{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  @media (min-width: 620px){
+    .goals-grid{ grid-template-columns: 1fr 1fr; }
+    .goal-card.wide{ grid-column: 1 / -1; }
+  }
+  .goal-card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .goal-head{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .goal-head .icon-wrap{
+    width: 32px; height: 32px; border-radius: 9px;
+    background: var(--pine-soft); color: var(--pine);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .goal-head .icon-wrap svg{ width: 17px; height: 17px; }
+  .goal-title{ font-size: 14.5px; font-weight: 800; color: var(--pine-strong); }
+  .goal-sub{ font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .goal-row{ display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .goal-row label{ font-size: 12px; color: var(--muted); font-weight: 700; min-width: 54px; }
+  .goal-row input, .goal-row select{ flex: 1; min-width: 90px; }
+  textarea{
+    font-family: inherit;
+    font-size: 13.5px;
+    padding: 9px 11px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
+    resize: vertical;
+    min-height: 46px;
+  }
+  .progress-track{
+    position: relative;
+    height: 14px;
+    background: var(--bg-alt);
+    border-radius: 999px;
+    overflow: visible;
+    margin-top: 4px;
+  }
+  .progress-fill{
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    background: linear-gradient(90deg, var(--coral), var(--pine));
+    border-radius: 999px;
+    transition: width .3s ease;
+  }
+  .progress-track .marker{
+    position: absolute;
+    top: -3px;
+    width: 2px;
+    height: 20px;
+    background: var(--ink);
+    opacity: .35;
+  }
+  .progress-track .marker-label{
+    position: absolute;
+    top: 18px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+  .progress-num{
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .progress-num .now{ color: var(--pine-strong); font-size: 15px; }
+  .toggle-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .switch{
+    width: 42px; height: 24px;
+    border-radius: 999px;
+    background: var(--line-strong);
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background .2s ease;
+  }
+  .switch.on{ background: var(--pine); }
+  .switch::after{
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform .2s ease;
+  }
+  .switch.on::after{ transform: translateX(18px); }
+  .switch-label{ font-size: 13.5px; font-weight: 700; color: var(--ink); }
+
+  .balance-display{
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--pine-strong);
+    font-variant-numeric: tabular-nums;
+  }
+
+  footer{
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--faint);
+    padding-top: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <h1 class="greeting" id="greeting">Good morning</h1>
+        <div class="date-line" id="dateLine">Monday, January 1</div>
+      </div>
+      <div class="streak-pill" id="streakPill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 0c0-1-.5-2-1-2 1.5 2 2 3.5 2 5a5 5 0 0 1-10 0c0-5 4-6 3-10 1 0 2.5.5 3 3z"/></svg>
+        <span class="n" id="streakCount">0</span><span>day streak</span>
+      </div>
+    </div>
+    <div class="streak-sub" id="streakSub">Complete 70% of today's list to keep it going.</div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Today's <span class="accent">checklist</span></div>
+      <button class="icon-btn" id="manageBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 13.5a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V19.5a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H4.5a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H10.6a1.6 1.6 0 0 0 1-1.5V4.5a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V10.4a1.6 1.6 0 0 0 1.5 1h.1a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+        Manage
+      </button>
+    </div>
+
+    <div class="viewing-banner" id="viewingBanner">
+      <span id="viewingText">Viewing March 3</span>
+      <button id="backToToday">Back to today</button>
+    </div>
+
+    <div class="day-progress">
+      <div class="bar"><span id="dayBarFill" style="width:0%"></span></div>
+      <div class="pct" id="dayPct">0%</div>
+    </div>
+
+    <div class="checklist" id="checklist"></div>
+
+    <div class="manage-panel" id="managePanel">
+      <h4>Active habits</h4>
+      <div class="manage-list" id="manageList"></div>
+      <h4>Add a habit</h4>
+      <div class="manage-add">
+        <input type="text" id="newHabitLabel" placeholder="e.g. Stretch before bed" maxlength="40" />
+        <select id="newHabitIcon"></select>
+        <button class="btn-solid" id="addHabitBtn">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Month at a <span class="accent">glance</span></div>
+    </div>
+    <div class="cal-card">
+      <div class="cal-nav">
+        <button class="nav-btn" id="prevMonth" aria-label="Previous month">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="month-label" id="monthLabel">January 2026</div>
+        <button class="nav-btn" id="nextMonth" aria-label="Next month">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="legend">
+        <span>Low</span>
+        <div class="legend-bar"></div>
+        <span>High</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">Long-term <span class="accent">goals</span></div>
+    </div>
+    <div class="goals-grid">
+
+      <div class="goal-card">
+        <div class="goal-head">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6M12 9c-2 2-4 3-4 6a4 4 0 0 0 8 0c0-3-2-4-4-6z"/><path d="M8.5 20.5h7"/></svg></div>
+          <div>
+            <div class="goal-title">Fix knees</div>
+            <div class="goal-sub">Status and notes</div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <label>Status</label>
+          <select id="kneesStatus">
+            <option value="not_started">Not started</option>
+            <option value="in_progress">In progress</option>
+            <option value="resolved">Resolved</option>
+          </select>
+        </div>
+        <textarea id="kneesNote" placeholder="Physio notes, what's helping, what's not…"></textarea>
+      </div>
+
+      <div class="goal-card">
+        <div class="goal-head">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="2.2"/><circle cx="18.5" cy="12" r="2.2"/><path d="M7.7 12h8.6M3.5 12h.4M20.1 12h.4"/></svg></div>
+          <div>
+            <div class="goal-title">Bench press</div>
+            <div class="goal-sub">Current 1RM</div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <label>1RM (lb)</label>
+          <input type="number" id="benchCurrent" min="0" step="5" placeholder="185" />
+        </div>
+        <div class="progress-track" id="benchTrack" style="margin-top:16px;">
+          <div class="progress-fill" id="benchFill"></div>
+          <div class="marker" id="benchM225"></div>
+          <div class="marker-label" id="benchM225Label">225</div>
+          <div class="marker" id="benchM315"></div>
+          <div class="marker-label" id="benchM315Label">315</div>
+        </div>
+      </div>
+
+      <div class="goal-card">
+        <div class="goal-head">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 3 6-7 3 3"/><path d="M3 21h18"/></svg></div>
+          <div>
+            <div class="goal-title">Income milestone</div>
+            <div class="goal-sub">Target and current</div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <label>Target</label>
+          <input type="number" id="incomeTarget" min="0" step="1000" placeholder="150000" />
+        </div>
+        <div class="goal-row">
+          <label>Current</label>
+          <input type="number" id="incomeCurrent" min="0" step="1000" placeholder="95000" />
+        </div>
+        <div class="progress-num"><span class="now" id="incomeNowLabel">$0</span><span id="incomeTargetLabel">of $0</span></div>
+        <div class="progress-track"><div class="progress-fill" id="incomeFill"></div></div>
+      </div>
+
+      <div class="goal-card">
+        <div class="goal-head">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V10l8-6 8 6v11"/><path d="M9 21v-6h6v6"/></svg></div>
+          <div>
+            <div class="goal-title">First property</div>
+            <div class="goal-sub">Land or house</div>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <div class="switch" id="propertyToggle"><input type="checkbox" id="propertyAchieved" style="display:none" /></div>
+          <span class="switch-label" id="propertyLabel">Not yet achieved</span>
+        </div>
+        <textarea id="propertyNote" placeholder="Where, timeline, budget notes…"></textarea>
+      </div>
+
+      <div class="goal-card">
+        <div class="goal-head">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 11h18"/><circle cx="8" cy="15" r="1"/></svg></div>
+          <div>
+            <div class="goal-title">Savings goal</div>
+            <div class="goal-sub">Robinhood balance, manually updated · target $50,000</div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <label>Balance</label>
+          <input type="number" id="savingsCurrent" min="0" step="100" placeholder="12500" />
+        </div>
+        <div class="progress-num"><span class="now" id="savingsNowLabel">$0</span><span>of $50,000</span></div>
+        <div class="progress-track"><div class="progress-fill" id="savingsFill"></div></div>
+      </div>
+
+      <div class="goal-card">
+        <div class="goal-head">
+          <div class="icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5.5" width="19" height="13" rx="2.2"/><path d="M2.5 9.5h19"/></svg></div>
+          <div>
+            <div class="goal-title">Checking balance</div>
+            <div class="goal-sub">Chase balance, manually updated</div>
+          </div>
+        </div>
+        <div class="goal-row">
+          <label>Balance</label>
+          <input type="number" id="checkingCurrent" min="0" step="50" placeholder="2200" />
+        </div>
+        <div class="balance-display" id="checkingDisplay">$0</div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>Everything here stays on this device, in your browser's storage.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Icon library ---------------- */
+  var ICONS = {
+    focus: '<circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5"/>',
+    dumbbell: '<circle cx="5.3" cy="12" r="2.1"/><circle cx="18.7" cy="12" r="2.1"/><path d="M7.4 12h9.2M3.2 12h.4M20.4 12h.4"/>',
+    bowl: '<path d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M12 12V6.5M9.3 8.2 12 6.5l2.7 1.7"/>',
+    book: '<path d="M4 5.2c2.6-.9 5.2-.9 8 0v13.6c-2.8-.9-5.4-.9-8 0z"/><path d="M20 5.2c-2.6-.9-5.2-.9-8 0v13.6c2.8-.9 5.4-.9 8 0z"/>',
+    leaf: '<path d="M5 19c9 0 14-5 14-14-9 0-14 5-14 14z"/><path d="M5 19c3-3.5 6-6.5 10.5-11"/>',
+    pulse: '<path d="M3 12h4l2 6 4-12 2 6h6"/>',
+    pencil: '<path d="M4 20l.9-4L16 4.9a1.6 1.6 0 0 1 2.3 0l.8.8a1.6 1.6 0 0 1 0 2.3L8 19.1z"/><path d="M14 6.8l3.2 3.2"/>',
+    moon: '<path d="M20 14.3A8.5 8.5 0 1 1 9.7 4a7 7 0 0 0 10.3 10.3z"/>',
+    pill: '<rect x="3.5" y="9.5" width="17" height="7" rx="3.5" transform="rotate(-30 12 13)"/><path d="M10.2 9.7l3.6 6.6"/>',
+    droplet: '<path d="M12 3.2s6 6.7 6 11.3a6 6 0 0 1-12 0c0-4.6 6-11.3 6-11.3z"/>',
+    sun: '<circle cx="12" cy="12" r="4.3"/><path d="M12 2.8v2.4M12 18.8v2.4M4.6 12H2.2M21.8 12h-2.4M5.8 5.8l1.7 1.7M16.5 16.5l1.7 1.7M18.2 5.8l-1.7 1.7M7.5 16.5l-1.7 1.7"/>',
+    stretch: '<path d="M12 4v6"/><path d="M12 10l-5 4M12 10l5 4"/><circle cx="12" cy="2.6" r="1.4"/><path d="M7 14l-1.5 6M17 14l1.5 6"/>',
+    journal: '<rect x="4.5" y="3.5" width="15" height="17" rx="2"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/>',
+    heart: '<path d="M12 20s-7.5-4.6-9.7-9.3C.7 7 2.4 3.6 6 3.1c2-.3 3.8.7 5 2.3 1.2-1.6 3-2.6 5-2.3 3.6.5 5.3 3.9 3.7 7.6C19.5 15.4 12 20 12 20z"/>',
+    target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.3"/><circle cx="12" cy="12" r="1"/>'
+  };
+  function iconSvg(key, cls){
+    var body = ICONS[key] || ICONS.target;
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+body+'</svg>';
+  }
+
+  var ICON_CHOICES = [
+    ["focus","Target"],["dumbbell","Dumbbell"],["bowl","Bowl"],["book","Book"],
+    ["leaf","Leaf"],["pulse","Pulse"],["pencil","Pencil"],["moon","Moon"],
+    ["pill","Pill"],["droplet","Droplet"],["sun","Sun"],["stretch","Stretch"],
+    ["journal","Journal"],["heart","Heart"]
+  ];
+
+  /* ---------------- Defaults ---------------- */
+  var DEFAULT_HABITS = [
+    { id: "focus_work",  label: "1 hour of focused work",  icon: "focus" },
+    { id: "train_rest",  label: "Train, or an intentional rest day", icon: "dumbbell" },
+    { id: "macros",      label: "Hit macros", icon: "bowl" },
+    { id: "read",        label: "Read something", icon: "book" },
+    { id: "no_meat",     label: "No red meat or poultry", icon: "leaf" },
+    { id: "cardio",      label: "Cardio", icon: "pulse" },
+    { id: "homework",    label: "Homework", icon: "pencil" },
+    { id: "sleep",       label: "7–8 hours of sleep", icon: "moon" },
+    { id: "medication",  label: "Take medication", icon: "pill" },
+    { id: "hydrate",     label: "Hydrate", icon: "droplet" },
+    { id: "sunlight",    label: "Get outside in daylight", icon: "sun" },
+    { id: "mobility",    label: "Stretch or mobility work", icon: "stretch" },
+    { id: "journal",     label: "Journal or reflect", icon: "journal" }
+  ];
+
+  var EPOCH = "2000-01-01";
+
+  /* ---------------- Storage ---------------- */
+  var LS_HABITS = "daybook_habits_v1";
+  var LS_DAYS   = "daybook_days_v1";
+  var LS_GOALS  = "daybook_goals_v1";
+
+  function load(key, fallback){
+    try{
+      var raw = localStorage.getItem(key);
+      if(!raw) return fallback;
+      return JSON.parse(raw);
+    }catch(e){ return fallback; }
+  }
+  function save(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+  }
+
+  var habits = load(LS_HABITS, null);
+  if(!habits){
+    habits = DEFAULT_HABITS.map(function(h){
+      return { id:h.id, label:h.label, icon:h.icon, createdOn: EPOCH, removedOn: null };
+    });
+    save(LS_HABITS, habits);
+  }
+  var days = load(LS_DAYS, {});
+  var goals = load(LS_GOALS, {
+    knees: { status: "not_started", note: "" },
+    bench: { current: null },
+    income: { target: null, current: null },
+    property: { achieved: false, note: "" },
+    savings: { current: null },
+    checking: { current: null }
+  });
+
+  /* ---------------- Date helpers ---------------- */
+  function fmtDate(d){
+    var y = d.getFullYear();
+    var m = String(d.getMonth()+1).padStart(2,"0");
+    var day = String(d.getDate()).padStart(2,"0");
+    return y+"-"+m+"-"+day;
+  }
+  function parseDate(key){
+    var parts = key.split("-").map(Number);
+    return new Date(parts[0], parts[1]-1, parts[2]);
+  }
+  var todayKey = fmtDate(new Date());
+  var viewingKey = todayKey;
+
+  function activeHabitsFor(dateKey){
+    return habits.filter(function(h){
+      if(h.createdOn && dateKey < h.createdOn) return false;
+      if(h.removedOn && dateKey >= h.removedOn) return false;
+      return true;
+    });
+  }
+
+  function dayPercent(dateKey){
+    var active = activeHabitsFor(dateKey);
+    if(!active.length) return null;
+    var rec = days[dateKey];
+    if(!rec || !rec.checked || !rec.checked.length) return dateKey === todayKey ? 0 : (rec ? 0 : null);
+    var checkedActive = rec.checked.filter(function(id){
+      return active.some(function(h){ return h.id === id; });
+    });
+    return checkedActive.length / active.length;
+  }
+
+  /* ---------------- Header ---------------- */
+  function renderHeader(){
+    var h = new Date().getHours();
+    var g = h < 5 ? "Still up" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : h < 21 ? "Good evening" : "Good night";
+    document.getElementById("greeting").textContent = g;
+    document.getElementById("dateLine").textContent = new Date().toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
+
+    var streak = computeStreak();
+    document.getElementById("streakCount").textContent = streak;
+    document.getElementById("streakPill").style.opacity = streak > 0 ? 1 : 0.55;
+    var sub = document.getElementById("streakSub");
+    if(streak === 0){ sub.textContent = "Complete 70% of today's list to start a streak."; }
+    else { sub.textContent = streak + " day" + (streak===1?"":"s") + " in a row at 70% or better. Keep it up."; }
+  }
+
+  function computeStreak(){
+    var cursor = new Date();
+    var count = 0;
+    var first = true;
+    var guard = 0;
+    while(guard++ < 3660){
+      var key = fmtDate(cursor);
+      var active = activeHabitsFor(key);
+      if(!active.length) break;
+      var rec = days[key];
+      var checkedCount = rec ? rec.checked.filter(function(id){ return active.some(function(h){return h.id===id;}); }).length : 0;
+      if(first){
+        first = false;
+        if(!rec || checkedCount === 0){
+          cursor.setDate(cursor.getDate()-1);
+          continue;
+        }
+      }
+      var pct = checkedCount/active.length;
+      if(pct >= 0.7){
+        count++;
+        cursor.setDate(cursor.getDate()-1);
+      } else break;
+    }
+    return count;
+  }
+
+  /* ---------------- Checklist rendering ---------------- */
+  function renderChecklist(){
+    var list = document.getElementById("checklist");
+    var active = activeHabitsFor(viewingKey);
+    var rec = days[viewingKey] || { checked: [] };
+    list.innerHTML = "";
+    active.forEach(function(h){
+      var row = document.createElement("div");
+      var isDone = rec.checked.indexOf(h.id) !== -1;
+      row.className = "habit-row" + (isDone ? " done" : "");
+      row.innerHTML =
+        '<div class="icon-wrap">'+iconSvg(h.icon)+'</div>' +
+        '<div class="label">'+escapeHtml(h.label)+'</div>' +
+        '<div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div>';
+      row.addEventListener("click", function(){ toggleHabit(h.id); });
+      list.appendChild(row);
+    });
+    if(!active.length){
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:13.5px;">No habits tracked for this day. Add one from Manage.</div>';
+    }
+    renderDayProgress();
+    renderViewingBanner();
+  }
+
+  function escapeHtml(s){
+    var d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function toggleHabit(id){
+    var rec = days[viewingKey];
+    if(!rec){ rec = { checked: [] }; days[viewingKey] = rec; }
+    var idx = rec.checked.indexOf(id);
+    if(idx === -1) rec.checked.push(id); else rec.checked.splice(idx,1);
+    save(LS_DAYS, days);
+    renderChecklist();
+    renderHeader();
+    renderCalendar();
+  }
+
+  function renderDayProgress(){
+    var pct = dayPercent(viewingKey);
+    var p = pct === null ? 0 : pct;
+    document.getElementById("dayBarFill").style.width = (p*100)+"%";
+    document.getElementById("dayPct").textContent = Math.round(p*100)+"%";
+  }
+
+  function renderViewingBanner(){
+    var banner = document.getElementById("viewingBanner");
+    if(viewingKey === todayKey){
+      banner.classList.remove("show");
+    } else {
+      banner.classList.add("show");
+      document.getElementById("viewingText").textContent =
+        "Viewing " + parseDate(viewingKey).toLocaleDateString(undefined,{ weekday:"short", month:"long", day:"numeric" });
+    }
+  }
+  document.getElementById("backToToday").addEventListener("click", function(){
+    viewingKey = todayKey;
+    renderChecklist();
+  });
+
+  /* ---------------- Manage panel ---------------- */
+  var manageOpen = false;
+  document.getElementById("manageBtn").addEventListener("click", function(){
+    manageOpen = !manageOpen;
+    document.getElementById("managePanel").classList.toggle("show", manageOpen);
+    if(manageOpen) renderManagePanel();
+  });
+
+  function renderManagePanel(){
+    var wrap = document.getElementById("manageList");
+    var iconSelect = document.getElementById("newHabitIcon");
+    if(!iconSelect.options.length){
+      ICON_CHOICES.forEach(function(pair){
+        var opt = document.createElement("option");
+        opt.value = pair[0]; opt.textContent = pair[1];
+        iconSelect.appendChild(opt);
+      });
+    }
+    var active = activeHabitsFor(todayKey);
+    wrap.innerHTML = "";
+    active.forEach(function(h){
+      var row = document.createElement("div");
+      row.className = "manage-item";
+      row.innerHTML =
+        '<div class="icon-wrap">'+iconSvg(h.icon)+'</div>' +
+        '<span>'+escapeHtml(h.label)+'</span>' +
+        '<button class="remove">Remove</button>';
+      row.querySelector(".remove").addEventListener("click", function(){
+        var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+        h.removedOn = fmtDate(tomorrow);
+        save(LS_HABITS, habits);
+        renderManagePanel();
+        renderChecklist();
+        renderCalendar();
+      });
+      wrap.appendChild(row);
+    });
+  }
+
+  document.getElementById("addHabitBtn").addEventListener("click", function(){
+    var input = document.getElementById("newHabitLabel");
+    var iconSelect = document.getElementById("newHabitIcon");
+    var label = input.value.trim();
+    if(!label) return;
+    var id = "custom_" + Date.now();
+    habits.push({ id:id, label:label, icon: iconSelect.value || "target", createdOn: todayKey, removedOn: null });
+    save(LS_HABITS, habits);
+    input.value = "";
+    renderManagePanel();
+    renderChecklist();
+  });
+
+  /* ---------------- Calendar ---------------- */
+  var calDate = new Date();
+  calDate.setDate(1);
+
+  function colorForPct(p){
+    var coral = [222,97,65], gold = [198,138,52], pine = [30,61,48];
+    var c;
+    if(p <= 0.5){
+      var t = p/0.5;
+      c = lerp3(coral, gold, t);
+    } else {
+      var t2 = (p-0.5)/0.5;
+      c = lerp3(gold, pine, t2);
+    }
+    return "rgb("+c[0]+","+c[1]+","+c[2]+")";
+  }
+  function lerp3(a,b,t){
+    return [ Math.round(a[0]+(b[0]-a[0])*t), Math.round(a[1]+(b[1]-a[1])*t), Math.round(a[2]+(b[2]-a[2])*t) ];
+  }
+
+  function renderCalendar(){
+    var label = calDate.toLocaleDateString(undefined,{ month:"long", year:"numeric" });
+    document.getElementById("monthLabel").textContent = label;
+    var grid = document.getElementById("calGrid");
+    grid.innerHTML = "";
+    ["S","M","T","W","T","F","S"].forEach(function(d){
+      var el = document.createElement("div");
+      el.className = "cal-dow"; el.textContent = d;
+      grid.appendChild(el);
+    });
+    var year = calDate.getFullYear(), month = calDate.getMonth();
+    var firstDow = new Date(year, month, 1).getDay();
+    var daysInMonth = new Date(year, month+1, 0).getDate();
+    for(var i=0;i<firstDow;i++){
+      var pad = document.createElement("div");
+      pad.className = "cal-day empty";
+      grid.appendChild(pad);
+    }
+    for(var d=1; d<=daysInMonth; d++){
+      var dateObj = new Date(year, month, d);
+      var key = fmtDate(dateObj);
+      var cell = document.createElement("div");
+      var isFuture = key > todayKey;
+      var pct = isFuture ? null : dayPercent(key);
+      var cls = "cal-day in-month";
+      if(key === todayKey) cls += " today";
+      if(key === viewingKey && key !== todayKey) cls += " selected";
+      if(isFuture) cls += " future";
+      if(pct !== null) cls += " has-data";
+      cell.className = cls;
+      cell.textContent = d;
+      if(pct !== null){
+        var bg = colorForPct(pct);
+        cell.style.background = bg;
+        var lum = 0.299*(pct<=0.5?lerp3([222,97,65],[198,138,52],pct/0.5):lerp3([198,138,52],[30,61,48],(pct-0.5)/0.5))[0];
+        cell.style.color = pct > 0.62 ? "#f4f1e4" : "#2a1c14";
+        cell.addEventListener("click", function(k){
+          return function(){ viewingKey = k; renderChecklist(); renderCalendar(); window.scrollTo({top:0, behavior:"smooth"}); };
+        }(key));
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  document.getElementById("prevMonth").addEventListener("click", function(){
+    calDate.setMonth(calDate.getMonth()-1);
+    renderCalendar();
+  });
+  document.getElementById("nextMonth").addEventListener("click", function(){
+    calDate.setMonth(calDate.getMonth()+1);
+    renderCalendar();
+  });
+
+  /* ---------------- Goals ---------------- */
+  function fmtMoney(n){
+    n = n || 0;
+    return "$" + Math.round(n).toLocaleString();
+  }
+
+  function bindGoalInputs(){
+    var kneesStatus = document.getElementById("kneesStatus");
+    var kneesNote = document.getElementById("kneesNote");
+    kneesStatus.value = goals.knees.status || "not_started";
+    kneesNote.value = goals.knees.note || "";
+    kneesStatus.addEventListener("change", function(){ goals.knees.status = kneesStatus.value; save(LS_GOALS, goals); });
+    kneesNote.addEventListener("input", function(){ goals.knees.note = kneesNote.value; save(LS_GOALS, goals); });
+
+    var benchCurrent = document.getElementById("benchCurrent");
+    benchCurrent.value = goals.bench.current != null ? goals.bench.current : "";
+    benchCurrent.addEventListener("input", function(){
+      goals.bench.current = benchCurrent.value === "" ? null : Number(benchCurrent.value);
+      save(LS_GOALS, goals);
+      renderBench();
+    });
+
+    var incomeTarget = document.getElementById("incomeTarget");
+    var incomeCurrent = document.getElementById("incomeCurrent");
+    incomeTarget.value = goals.income.target != null ? goals.income.target : "";
+    incomeCurrent.value = goals.income.current != null ? goals.income.current : "";
+    incomeTarget.addEventListener("input", function(){ goals.income.target = incomeTarget.value===""?null:Number(incomeTarget.value); save(LS_GOALS, goals); renderIncome(); });
+    incomeCurrent.addEventListener("input", function(){ goals.income.current = incomeCurrent.value===""?null:Number(incomeCurrent.value); save(LS_GOALS, goals); renderIncome(); });
+
+    var propertyToggle = document.getElementById("propertyToggle");
+    var propertyNote = document.getElementById("propertyNote");
+    propertyNote.value = goals.property.note || "";
+    propertyToggle.addEventListener("click", function(){
+      goals.property.achieved = !goals.property.achieved;
+      save(LS_GOALS, goals);
+      renderProperty();
+    });
+    propertyNote.addEventListener("input", function(){ goals.property.note = propertyNote.value; save(LS_GOALS, goals); });
+
+    var savingsCurrent = document.getElementById("savingsCurrent");
+    savingsCurrent.value = goals.savings.current != null ? goals.savings.current : "";
+    savingsCurrent.addEventListener("input", function(){ goals.savings.current = savingsCurrent.value===""?null:Number(savingsCurrent.value); save(LS_GOALS, goals); renderSavings(); });
+
+    var checkingCurrent = document.getElementById("checkingCurrent");
+    checkingCurrent.value = goals.checking.current != null ? goals.checking.current : "";
+    checkingCurrent.addEventListener("input", function(){ goals.checking.current = checkingCurrent.value===""?null:Number(checkingCurrent.value); save(LS_GOALS, goals); renderChecking(); });
+  }
+
+  function renderBench(){
+    var cur = goals.bench.current || 0;
+    var max = 350;
+    var pct = Math.min(cur/max, 1) * 100;
+    document.getElementById("benchFill").style.width = pct + "%";
+    document.getElementById("benchM225").style.left = (225/max*100) + "%";
+    document.getElementById("benchM225Label").style.left = (225/max*100) + "%";
+    document.getElementById("benchM315").style.left = (315/max*100) + "%";
+    document.getElementById("benchM315Label").style.left = (315/max*100) + "%";
+  }
+  function renderIncome(){
+    var target = goals.income.target || 0;
+    var current = goals.income.current || 0;
+    var pct = target > 0 ? Math.min(current/target,1)*100 : 0;
+    document.getElementById("incomeFill").style.width = pct + "%";
+    document.getElementById("incomeNowLabel").textContent = fmtMoney(current);
+    document.getElementById("incomeTargetLabel").textContent = "of " + fmtMoney(target);
+  }
+  function renderProperty(){
+    var on = !!goals.property.achieved;
+    document.getElementById("propertyToggle").classList.toggle("on", on);
+    document.getElementById("propertyLabel").textContent = on ? "Achieved" : "Not yet achieved";
+  }
+  function renderSavings(){
+    var current = goals.savings.current || 0;
+    var pct = Math.min(current/50000,1)*100;
+    document.getElementById("savingsFill").style.width = pct + "%";
+    document.getElementById("savingsNowLabel").textContent = fmtMoney(current);
+  }
+  function renderChecking(){
+    document.getElementById("checkingDisplay").textContent = fmtMoney(goals.checking.current || 0);
+  }
+
+  /* ---------------- Init ---------------- */
+  renderHeader();
+  renderChecklist();
+  renderCalendar();
+  bindGoalInputs();
+  renderBench();
+  renderIncome();
+  renderProperty();
+  renderSavings();
+  renderChecking();
+
+})();
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "Daybook",
+  "short_name": "Daybook",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#efece0",
+  "theme_color": "#1e3d30",
+  "description": "A calm, offline daily habit tracker.",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
